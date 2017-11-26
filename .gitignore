@@ -2,4 +2,4 @@
 .vagrant/
 *.retry
 /*.log
-config.box.json
+/config.box.json
