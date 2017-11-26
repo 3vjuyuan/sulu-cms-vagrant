@@ -1,0 +1,54 @@
+---
+- name: Check if nginx is installed
+  raw: "dpkg -s nginx | grep {{nginx.version}}"
+  register: is_nginx_installed
+  failed_when: is_nginx_installed.rc < 0
+  changed_when: false
+  tags:
+    - nginx
+
+- name: Try to install nginx with nginx.org package repository, and use ubuntu repsository as fallback
+  block:
+    - name: Check if the signing key for nginx package reposirotyr exists
+      raw: "apt-key list | grep nginx"
+      register: exist_nginx_key
+      failed_when: exist_nginx_key.rc < 0
+      changed_when: false
+
+    - name: Add the signing key for nginx package repository
+      apt_key:
+        url: http://nginx.org/keys/nginx_signing.key
+        state: present
+      when: exist_nginx_key.rc > 0
+
+    - name: Check if the nginx repository is in the source list
+      raw: "grep nginx /etc/apt/sources.list /etc/apt/sources.list.d/*"
+      register: exist_nginx_repo
+      failed_when: exist_nginx_repo.rc < 0
+      changed_when: false
+
+    - name: Add the nginx repositry into source list
+      apt_repository:
+        repo: "deb http://nginx.org/packages/ubuntu/ {{ansible_lsb.codename}} nginx"
+        state: present
+      when: exist_nginx_repo.rc > 0
+
+    - name: Add the nginx source repositry into source list
+      apt_repository:
+        repo: "deb-src http://nginx.org/packages/ubuntu/ {{ansible_lsb.codename}} nginx"
+        state: present
+      when: exist_nginx_repo.rc > 0
+
+    - name: Install nginx package from nignx.org deb source with specified version
+      apt:
+        name: "nginx={{nginx.version}}*"
+        update_cache: yes
+  rescue:
+    - name: Install nginx package from ubuntu package repository with latest version
+      apt:
+        name: nginx
+        update_cache: yes
+        state: latest
+  when: is_nginx_installed.rc > 0
+  tags:
+    - nginx

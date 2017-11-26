@@ -1,0 +1,119 @@
+---
+- name: Install the dependencies package for php
+  apt:
+    name: "{{item}}"
+    state: latest
+  with_items: "{{packages.dependencies}}"
+  tags:
+    - packages
+    - php
+
+- name: Check if php is installed
+  raw: "php -v | grep {{ php.version }}"
+  register: php_installed
+  failed_when: php_installed.rc < 0
+  changed_when: false
+  tags:
+    - php
+
+- name: Install PHP with specified version
+  block:
+    - name: Download PHP source code and unzip it
+      unarchive:
+        src: "http://php.net/distributions/php-{{ php.version }}.tar.gz"
+        dest: "{{ temp_file_path }}"
+        remote_src: yes
+        creates: php.source.lock
+
+    - name: Run configure script for PHP installation
+      shell:  "{{ item }}"
+      args:
+        chdir: "{{ temp_file_path }}/php-{{ php.version }}/"
+        creates: "{{ temp_file_path }}/php-{{ php.version }}/config.log"
+      with_items:
+        - "{{ php.build_configure_command }}"
+        - "{{ php.source_configure_command }}"
+
+    - name: Make and install PHP
+      make:
+        chdir: "{{ temp_file_path }}/php-{{ php.version }}/"
+        target: install
+
+    - name: Check if symlink for php is created in /usr/bin
+      stat:
+        path: /usr/bin/php
+      register: php_bin
+
+    - name: Create the symlinks for php commands in /usr/bin
+      file:
+        src: "/opt/php/bin/{{item.src}}"
+        dest: "/usr/bin/{{item.dest}}"
+        state: link
+      with_items:
+        - {src: "php", dest: "php"}
+        - {src: "php-cgi", dest: "php-cgi"}
+        - {src: "phpize", dest: "phpize"}
+        - {src: "php-config", dest: "php-config"}
+        - {src: "phpdbg", dest: "phpdbg"}
+        - {src: "pear", dest: "pear"}
+        - {src: "peardev", dest: "peardev"}
+        - {src: "pecl", dest: "pecl"}
+        - {src: "phar", dest: "phar"}
+        - {src: "phar.phar", dest: "phar.phar"}
+      when: php_bin.stat.exists == False
+
+    - name: Create the symlinks for php-fpm commands in /usr/bin
+      file:
+        src: "/opt/php/sbin/php-fpm"
+        dest: "/usr/bin/php-fpm"
+        state: link
+      when: php_bin.stat.exists == False
+
+    - name: Copy php-fpm from php sapi source code to init.d
+      copy:
+        src: "{{ temp_file_path }}/php-{{ php.version }}/sapi/fpm/init.d.php-fpm"
+        dest: /etc/init.d/php-fpm
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Start php-fpm at the boot time
+      command: update-rc.d php-fpm defaults 01
+      args:
+        chdir: /etc/init.d
+
+    - name: Create directory for php.ini file
+      file:
+        path: /opt/php/conf
+        state: directory
+  when: php_installed.rc > 0
+  tags:
+    - php
+
+- name: Check if composer is installed
+  command: composer -V
+  register: composer_bin
+  failed_when: php_installed.rc < 0
+  changed_when: false
+  tags:
+    - php
+    - php-composer
+
+- name: Install PHP Composer with specified version
+  block:
+    - name: Download Composer installer.
+      get_url:
+        url: https://getcomposer.org/installer
+        dest: "{{ temp_file_path }}/composer-installer.php"
+        mode: 0755
+
+    - name: Run Composer installer.
+      command: php composer-installer.php --filename=composer --install-dir=/usr/local/bin
+      args:
+        chdir: "{{ temp_file_path }}"
+        creates: composer.install.lock
+  when: composer_bin.rc > 0
+  tags:
+    - php
+    - php-composer

@@ -1,0 +1,13 @@
+{
+  "project": "my-project",
+  "name": "your-name",
+  "provider": "virtualbox",
+  "box":{
+    "name": "ubuntu/xenial64"
+  },
+  "vm": {
+    "cpu_count": 2,
+    "memory": 4096,
+    "ipv4": "192.168.100.100"
+  }
+}

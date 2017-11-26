@@ -1,0 +1,113 @@
+---
+packages:
+  package_path: /tmp/packages
+  basic:
+    - "make"
+    - "autoconf"
+    - "gcc"
+    - "bison"
+    - "libxml2"
+    - "libxml2-dev"
+    - "curl"
+    - "openssl"
+    - "snmp"
+    - "snmpd"
+    - "pkg-config"
+    - "snmp-mibs-downloader"
+    - "zip"
+  dependencies:
+    - "libmcrypt-dev"
+    - "libcurl4-gnutls-dev"
+    - "libssl-dev"
+    - "libjpeg-dev"
+    - "libpng12-dev"
+    - "libxpm-dev"
+    - "libfreetype6-dev"
+    - "libperl-dev"
+    - "libtidy-dev"
+    - "libxslt1-dev"
+    - "libsslcommon2-dev"
+    - "libbz2-dev"
+    - "libgmp-dev"
+    - "libmysqlclient-dev"
+    - "libpspell-dev"
+    - "libpng-dev"
+    - "libgmp3-dev"
+    - "libmysqlclient-dev"
+    - "librecode-dev"
+    - "libldap-2.4-2"
+    - "ldap-utils"
+    - "libldap2-dev"
+    - "libsnmp-dev"
+  image:
+    - "graphicsmagick"
+    - "libjpeg-turbo-progs"
+    - "optipng"
+    - "pngcrush"
+    - "pngquant"
+    - "pngnq"
+
+nodejs:
+  source_version: "8.x"
+  version: "8.*"
+
+nginx:
+  version: "1.12.1"
+
+java:
+  version: "8"
+
+php:
+  version: "7.1.9"
+  build_configure_command: "./buildconf --force"
+  source_configure_command: >
+    ./configure
+    --prefix=/opt/php
+    --with-config-file-path=/opt/php/conf
+    --enable-fpm
+    --with-fpm-user=vagrant
+    --with-fpm-group=vagrant
+    --enable-mbstring
+    --enable-zip
+    --enable-bcmath
+    --enable-ftp
+    --enable-exif
+    --enable-calendar
+    --enable-sysvmsg
+    --enable-sysvsem
+    --enable-sysvshm
+    --enable-wddx
+    --with-curl=/usr/bin
+    --with-mcrypt
+    --with-iconv-dir=/usr
+    --with-pspell
+    --with-gd
+    --with-jpeg-dir=/usr
+    --with-png-dir=/usr
+    --with-zlib-dir=/usr
+    --with-xpm-dir=/usr
+    --with-freetype-dir=/usr
+    --enable-gd-native-ttf
+    --enable-gd-jis-conv
+    --with-openssl
+    --enable-mysqlnd
+    --with-pdo-mysql=mysqlnd
+    --with-mysqli=mysqlnd
+    --with-mysql-sock
+    --with-gettext=/usr
+    --with-zlib=/usr
+    --with-bz2=/usr
+    --with-recode=/usr
+    --with-tidy=/usr
+    --with-xsl=/usr
+    --with-ldap
+    --with-xmlrpc
+    --with-snmp=/usr
+    --with-pear
+    --with-libdir=/lib/x86_64-linux-gnu
+    --enable-shmop
+    --enable-maintainer-zts -enable-opcache
+    --enable-sockets
+    --with-snmp
+    --enable-soap
+    --enable-intl

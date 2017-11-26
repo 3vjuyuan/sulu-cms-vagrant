@@ -1,0 +1,20 @@
+---
+nginx_server:
+  user: ubuntu
+  usergroup: ubuntu
+
+openssl:
+  csr_fields:
+    email_address: 'dev@sulu.box'
+
+project:
+  name: sulu-dev
+  domain:
+    dev: sulu.dev.box
+  database:
+    dbname: sulu_cms
+    user: sulu
+    passwd: sulu
+    secret_key: ThisTokenIsNotSoSecretChangeIt
+
+play_project_role: other

@@ -1,0 +1,37 @@
+---
+#@todo Check if xdebug is installed
+- name: Download PHP xdebug source code and unzip it
+  unarchive:
+    src: "https://xdebug.org/files/xdebug-{{ php_conf.xdebug_version }}.tgz"
+    dest: "{{ansible_env.HOME}}/packages"
+    remote_src: yes
+    creates: xdebug.source.lock
+  tags:
+    - php-xdebug
+
+- name: Phpize xdebug
+  shell: phpize && ./configure --enable-xdebug
+  args:
+    chdir: "{{ temp_file_path }}/xdebug-{{ php_conf.xdebug_version }}/"
+  register: xdebug_config
+  tags:
+    - php-xdebug
+
+- name: Make install xdebug
+  make:
+    chdir: "{{ temp_file_path }}/xdebug-{{ php_conf.xdebug_version }}/"
+    target: install
+  when: xdebug_config.rc == 0
+  notify: Restart Web Server
+  tags:
+    - php-xdebug
+
+#@todo Use xdebug_config.stdout_lines to read the xdebug.so file path
+- name: Copy php.ini file
+  template:
+    src: php-development.ini
+    dest: /opt/php/conf/php.ini
+    force: yes
+  notify: Restart Web Server
+  tags:
+    - php-conf

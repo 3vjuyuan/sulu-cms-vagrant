@@ -1,0 +1,19 @@
+---
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: true
+  listen: "Restart Web Server"
+
+- name: Restart php-fpm
+  command: /etc/init.d/php-fpm restart
+  listen: "Restart Web Server"
+
+- name: Restart redis
+  become: yes
+  service:
+    name: redis-server
+    state: restarted
+    enabled: true
+  listen: "Restart Cache Services"

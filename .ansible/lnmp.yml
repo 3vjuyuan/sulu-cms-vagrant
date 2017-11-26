@@ -1,0 +1,93 @@
+---
+- name: Initialise the ansible enviorment
+  hosts: all
+  gather_facts: False
+  tasks:
+    - name: Gathering the system information
+      raw: lsb_release -s -i
+      register: os_name
+      changed_when: false
+
+    - name: If the remote host is not an Ubuntu system, break the execution
+      fail:
+        msg: "The remote host is not an Ubuntu System. This program does not support."
+      when: "'Ubuntu' not in os_name.stdout"
+
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-simplejson)
+      changed_when: False
+
+- name: Set up the development system by vagrant ansible provision
+  hosts: all
+  vars_files:
+    - configs/all.yml
+  vars:
+    temp_file_path: "{{ ansible_env.HOME }}/packages"
+    play_custom_role: "{{custom_play_role is defined and custom_roles_path is defined and [custom_roles_path, custom_play_role, 'tasks/main.yml']|join('/')|is_file}}"
+  pre_tasks:
+    - name: Determine if the custom variables path exists
+      local_action: "stat path={{custom_vars_path}}"
+      become: false
+      register: include_vars_path
+      when: custom_vars_path is defined
+      tags:
+        - pre-tasks
+
+    - name: Import the custom variables that are defined in .json, .jsn, .yaml, .yml
+      include_vars:
+        dir: "{{custom_vars_path}}"
+        depth: 2
+        extensions:
+          - yaml
+          - yml
+          - json
+          - jsn
+      when: custom_vars_path is defined and include_vars_path.stat.isdir is defined and include_vars_path.stat.isdir
+      tags:
+        - pre-tasks
+
+    - name: Make directory under the ansible home directory for temporary uploads files
+      file:
+        path: "{{ temp_file_path }}"
+        state: directory
+        mode: 0755
+      tags:
+        - pre-tasks
+
+    - name: Updates the package lists and install ansible reqiured packages
+      block:
+        - name: Install the packages that is required by ansible
+          apt:
+            name: "{{item}}"
+            state: latest
+            update_cache: yes
+          with_items: "{{ansible.requirements}}"
+      rescue:
+        - name: Error occours during installing packages. Try to remove the lock file of apt
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - /var/cache/apt/archives/lock
+            - /var/lib/dpkg/lock
+            - /var/lib/apt/lists/lock
+
+        - name: Try to reconfigure the dpkg configuration
+          command: dpkg --configure -a
+
+        - name: Run "apt-get update" again after remove the lock
+          apt:
+            update_cache: yes
+
+        - name: Install the packages that is required by ansible after fix the dpkg problem
+          apt:
+            name: "{{item}}"
+            state: latest
+          with_items: "{{ansible.requirements}}"
+      tags:
+        - packages
+        - pre-tasks
+  roles:
+#    - base
+#    - development
+    - "{{ custom_play_role if play_custom_role else 'project'}}"

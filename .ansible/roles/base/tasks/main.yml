@@ -1,0 +1,7 @@
+---  
+- import_tasks: system.yml
+- import_tasks: nginx.yml
+- import_tasks: nodejs.yml
+- import_tasks: java.yml
+- import_tasks: php.yml
+- import_tasks: others.yml

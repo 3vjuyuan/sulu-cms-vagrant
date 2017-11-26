@@ -1,0 +1,13 @@
+---
+- name: Check if redis-server is installed
+  command: dpkg-query -W redis-server
+  register: redis_deb_state
+  failed_when: redis_deb_state.rc > 1
+  changed_when: redis_deb_state.rc == 1
+
+- name: install redis
+  apt:
+    name: redis-server
+    state: latest
+  when: redis_deb_state.rc == 1
+  notify: Restart Cache Services

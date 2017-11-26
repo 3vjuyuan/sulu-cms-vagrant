@@ -1,0 +1,50 @@
+---
+- name: Write phpinfo() into the info.php under the project website directory for testing purpose
+  block:
+    - name: Check if the project directory exists
+      stat:
+        path: "/projects/{{project.name}}/"
+      register: project_path
+
+    - name: Create the project diretory with website as sub directory to hold website files
+      file:
+        path: "/projects/{{project.name}}/website"
+        state: directory
+        owner: "{{nginx_server.user}}"
+        group: "{{nginx_server.usergroup}}"
+        mode: 0770
+        recurse: true
+      when: project_path.stat.exists == False
+
+    - name: Create info.php to print the php configruation
+      copy:
+        content: "<?php phpinfo(); ?>"
+        dest: "/projects/{{project.name}}/website/info.php"
+        owner: "{{nginx_server.user}}"
+        group: "{{nginx_server.usergroup}}"
+        mode: 0770
+  tags:
+    - project
+
+- name: Create project database
+  block:
+    - name: Check if the database with configured name exists
+      raw: mysql -e 'SHOW DATABASES;' | grep {{project.database.dbname}}
+      register: dbstatus
+      failed_when: dbstatus.rc < 0
+      changed_when: false
+
+    - name: Create a new database for project with configured name
+      mysql_db:
+        name: "{{project.database.dbname}}"
+        state: present
+      when: dbstatus.rc > 0
+
+    - name: Create Database User for project
+      mysql_user:
+        name: "{{project.database.user}}"
+        password: "{{project.database.passwd}}"
+        priv: '{{project.database.dbname}}.*:ALL'
+        state: present
+  tags:
+    - project

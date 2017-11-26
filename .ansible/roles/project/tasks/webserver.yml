@@ -1,0 +1,54 @@
+---
+- name: Delete default nginx file
+  file:
+    path: /etc/nginx/conf.d/default.conf
+    state: absent
+  notify: Restart Web Server
+  tags:
+    - webserver
+    - project
+
+- name: Generate self-signed SSL certification for nginx server and set up nginx configuration file
+  block:
+    - name: Create ssl directory
+      file:
+        path: /etc/nginx/ssl
+        state: directory
+        mode: 0755
+
+    - name: Force to generate an OpenSSL private key with default value
+      openssl_privatekey:
+        path: /etc/nginx/ssl/self.key
+        force: true
+
+    - name: Force to generate an OpenSSL Certificate Signing Request with Subject information
+      openssl_csr:
+        path: /etc/nginx/ssl/self.csr
+        privatekey_path: /etc/nginx/ssl/self.key
+        force: true
+        country_name: "{{openssl.csr_fields.country_name}}"
+        state_or_province_name: "{{openssl.csr_fields.state_or_province_name}}"
+        locality_name: "{{openssl.csr_fields.locality_name}}"
+        organization_name: "{{openssl.csr_fields.organization_name}}"
+        organizational_unit_name: "{{openssl.csr_fields.organizational_unit_name}}"
+        common_name: "{{openssl.csr_fields.common_name}}"
+        email_address: "{{openssl.csr_fields.email_address}}"
+
+    - name: Force to generate a Self Signed OpenSSL certificate
+      openssl_certificate:
+        path: /etc/nginx/ssl/self.crt
+        privatekey_path: /etc/nginx/ssl/self.key
+        csr_path: /etc/nginx/ssl/self.csr
+        provider: selfsigned
+        valid_in: "{{ 365 * 24 * 3600 }}"
+        force: true
+
+    - name: Copy nginx file
+      template:
+        src: "{{nginx_server.default_config}}"
+        dest: /etc/nginx/conf.d/{{ project.name }}.conf
+        force: yes
+      notify: Restart Web Server
+  tags:
+    - webserver
+    - project

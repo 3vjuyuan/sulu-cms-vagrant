@@ -1,0 +1,36 @@
+---
+- name: Copy nginx configuration file into box
+  template:
+    src: nginx.conf
+    dest: "/etc/nginx/"
+    mode: 0644
+  notify: Restart Web Server
+  tags:
+    - webserver
+
+- name: Set the php-fpm config file with the defualt configuration in PHP installation path
+  command: mv php-fpm.conf.default php-fpm.conf
+  args:
+    chdir: /opt/php/etc
+    creates: /opt/php/etc/php-fpm.conf
+  notify: Restart Web Server
+  tags:
+    - webserver
+
+- name: Set php fpm site config file with the default configuration in PHP installation path
+  command: mv www.conf.default www.conf
+  args:
+    chdir: /opt/php/etc/php-fpm.d
+    creates: /opt/php/etc/php-fpm.d/www.conf
+  notify: Restart Web Server
+  tags:
+    - webserver
+
+- name: Change the user and group name to run php in the fpm site configuration file
+  replace:
+    path: /opt/php/etc/php-fpm.d/www.conf
+    regexp: 'user = (\w+)(\W)group = (\w+)'
+    replace: 'user = {{nginx_server.user}}\2group = {{nginx_server.usergroup}}'
+  notify: Restart Web Server
+  tags:
+    - webserver

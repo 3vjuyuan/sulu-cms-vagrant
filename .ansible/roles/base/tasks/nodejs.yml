@@ -1,0 +1,54 @@
+---
+- name: Check if nodejs is installed
+  raw: "dpkg -s nodejs | grep {{nodejs.version}}"
+  register: is_nodejs_installed
+  failed_when: is_nodejs_installed.rc < 0
+  changed_when: false
+  tags:
+    - nodejs
+
+- name: Try to install nodejs with nodesource.com package repository, and use ubuntu repsository as fallback
+  block:
+    - name: Check if the signing key for nodesource.com package reposirotyr exists
+      raw: "apt-key list | grep nodesource"
+      register: exist_nodesource_key
+      failed_when: exist_nodesource_key.rc < 0
+      changed_when: false
+
+    - name: Add the signing key for nodesource package repository
+      apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+        state: present
+      when: exist_nodesource_key.rc > 0
+
+    - name: Check if the nodesource repository is in the source list
+      raw: "grep nodesource /etc/apt/sources.list /etc/apt/sources.list.d/*"
+      register: exist_nodesource_repo
+      failed_when: exist_nodesource_repo.rc < 0
+      changed_when: false
+
+    - name: Add the nodesource.com repositry into source list
+      apt_repository:
+        repo: "deb https://deb.nodesource.com/node_{{ nodejs.source_version }} {{ansible_lsb.codename}} main"
+        state: present
+      when: exist_nodesource_repo.rc > 0
+
+    - name: Add the nodesource.com source repositry into source list
+      apt_repository:
+        repo: "deb-src https://deb.nodesource.com/node_{{ nodejs.source_version }} {{ansible_lsb.codename}} main"
+        state: present
+      when: exist_nodesource_repo.rc > 0
+
+    - name: Install nodesource.com package from nignx.org deb source with specified version
+      apt:
+        name: "nodejs={{nodejs.version}}*"
+        update_cache: yes
+  rescue:
+    - name: Install nodejs package from the current configured package repository with latest version
+      apt:
+        name: nodejs
+        update_cache: yes
+        state: latest
+  when: is_nodejs_installed.rc > 0
+  tags:
+    - nodejs

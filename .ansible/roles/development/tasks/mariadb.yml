@@ -1,0 +1,31 @@
+---
+- name: Check if mariadb is installed
+  command: dpkg-query -W mariadb-server
+  register: mariadb_deb_state
+  failed_when: mariadb_deb_state.rc > 1
+  changed_when: mariadb_deb_state.rc == 1
+
+- name: Install the package "mariadb-server"
+  apt:
+    name: mariadb-server
+    state: latest
+  when: mariadb_deb_state.rc == 1
+
+- name: Make sure mariadb service running
+  service:
+    name: mysql
+    state: started
+
+- name: Run mysql_secure_installation
+  expect:
+    command: mysql_secure_installation
+    creates: mysql_secure_installation.lock
+    responses:
+      'Enter current password for root \(enter for none\):': "\n"
+      '(?i)root password\? \[Y/n\] ': 'y'
+      'New password:': "{{mysql.root_passwd}}"
+      'Re-enter new password:': "{{mysql.root_passwd}}"
+      'Remove anonymous users\? \[Y/n\]': 'y'
+      'Disallow root login remotely\? \[Y/n\]': 'y'
+      'Remove test database and access to it\? \[Y/n\]': 'y'
+      'Reload privilege tables now\? \[Y/n\]': 'y'

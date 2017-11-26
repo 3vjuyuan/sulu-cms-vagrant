@@ -1,0 +1,9 @@
+---
+ansible:
+  requirements:
+    - "python-pexpect"
+    - "python-mysqldb"
+    - "python-openssl"
+
+system:
+  timezone: UTC

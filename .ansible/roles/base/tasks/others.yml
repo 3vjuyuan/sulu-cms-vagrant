@@ -1,0 +1,13 @@
+---
+- name: Install the packages for image optimazation
+  apt: name={{item}}
+  with_items: "{{packages.image}}"
+  tags:
+    - packages
+
+- name: Install the packages of the user customaztion
+  apt: name={{item}}
+  with_items: "{{packages.additional}}"
+  when: packages.additional is defined
+  tags:
+    - packages

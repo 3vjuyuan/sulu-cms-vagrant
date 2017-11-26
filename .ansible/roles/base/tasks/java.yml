@@ -1,0 +1,8 @@
+---
+- name: Install OpenJDK with specified version
+  apt:
+    name: "openjdk-{{java.version}}-jdk"
+    update_cache: yes
+    state: latest
+  tags:
+    - java

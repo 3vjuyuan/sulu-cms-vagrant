@@ -1,0 +1,33 @@
+---
+- name: Create database for Sulu CMS with configured variables
+  block:
+    - name: Check if the given project database exists
+      raw: mysql -e 'SHOW DATABASES;' | grep {{project.database.dbname}}
+      register: dbstatus
+      failed_when: dbstatus.rc < 0
+      changed_when: false
+
+    - name: Create the database for project with the given name if it doesn't exist
+      mysql_db:
+        name: "{{project.database.dbname}}"
+        state: present
+      when: dbstatus.rc > 0
+
+    - name: Make sure the dabatabe user, password and privileges are set
+      mysql_user:
+        name: "{{project.database.user}}"
+        password: "{{project.database.passwd}}"
+        priv: '{{project.database.dbname}}.*:ALL'
+        state: present
+  tags:
+    - sulu_project
+
+- name: Make sure the projects directory is created
+  file:
+    path: /projects
+    state: directory
+    owner: "{{nginx_server.user}}"
+    group: "{{nginx_server.usergroup}}"
+    mode: 0770
+  tags:
+    - sulu_project

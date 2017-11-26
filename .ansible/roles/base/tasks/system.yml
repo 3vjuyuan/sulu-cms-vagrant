@@ -1,0 +1,16 @@
+---
+- name: Install basic package
+  apt:
+    name: "{{item}}"
+    update_cache: yes
+    state: latest
+  with_items: "{{packages.basic}}"
+  tags:
+    - packages
+    - system
+
+- name: Set system timezone to the configured value
+  timezone:
+    name: "{{system.timezone}}"
+  tags:
+    - system

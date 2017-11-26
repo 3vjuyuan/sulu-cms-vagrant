@@ -1,0 +1,9 @@
+---
+# uncomment the line to define the custom vars path that will be loaded
+custom_vars_path: "{{playbook_dir}}/sulu_cms/vars"
+
+# uncomment the line to define the custom project role, which will be loaded instead of default "project" role
+custom_play_role: sulu_dev
+
+# uncomment the line to define the roles path, it should be same as the roles_path in ansible.cfg
+custom_roles_path: "{{playbook_dir}}/sulu_cms/roles"

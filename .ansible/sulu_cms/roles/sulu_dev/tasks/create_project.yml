@@ -1,0 +1,47 @@
+- name: Create or migrate the Sulu CMS project
+  block:
+    - name: Check if the Sulu CMS project directory exists
+      command: "ls -A /projects/{{project.name}}"
+      register: check_project_path
+      failed_when: check_project_path.rc < 0
+
+    - name: Set the project directory, where composer creates the new project
+      set_fact:
+        exists_sulu_project: "{{True if check_project_path.rc == 0 and check_project_path.stdout_lines|length > 0 else False}}"
+        project_taget_directory: "{{[project.name, '_tmp']|join('') if check_project_path.rc == 0 and check_project_path.stdout_lines|length > 0 else project.name}}"
+
+    - name: Create project with composer into the specified project directory
+      command: "composer create-project sulu/sulu-minimal {{project_taget_directory}} -n"
+      args:
+        chdir: /projects/
+
+    - name: Migrate the sulu project with existing codes
+      command: "mv -r /projects/{{project_taget_directory}} /projects/{{project.name}}"
+      when: exists_sulu_project == True
+
+    - name: Create and configure Sulu CMS project
+      block:
+        - name: Configure the webspaces xml
+          template:
+            src: sulu/webspaces/sulo.example.xml
+            dest: "/projects/{{project.name}}/app/Resources/webspaces/{{project.domain.dev}}.xml"
+
+        - name: Set up the database configruations
+          template:
+            src: sulu/config/parameters.yml
+            dest: "/projects/{{project.name}}/app/config/parameters.yml"
+
+        - name: Run the admin console of Sulu
+          command: bin/adminconsole sulu:build dev -q
+          args:
+            chdir: "/projects/{{project.name}}/"
+  rescue:
+    - debug: msg='There is some errors during the provision. Please check the log.'
+  always:
+    - name: Make sure the temporary project directory is deleted
+      file:
+        path: "/projects/{{project.name}}_tmp"
+        state: absent
+  become_user: "{{nginx_server.user}}"
+  tags:
+    - sulu_project
