@@ -1,0 +1,19 @@
+---
+openssl:
+  csr_fields:
+    country_name: ''
+    locality_name: ''
+    state_or_province_name: ''
+    organization_name: ''
+    organizational_unit_name: ''
+    common_name: '*'
+    email_address: 'email@youemail.com'
+
+project:
+  name: myproject
+  domain:
+    dev: '_'
+  database:
+    dbname: myproject
+    user: myproject
+    passwd: myproject
