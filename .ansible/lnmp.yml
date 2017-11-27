@@ -88,6 +88,6 @@
         - packages
         - pre-tasks
   roles:
-#    - base
-#    - development
+    - base
+    - development
     - "{{ custom_play_role if play_custom_role else 'project'}}"

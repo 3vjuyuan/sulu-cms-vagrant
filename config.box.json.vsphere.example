@@ -21,5 +21,8 @@
     "cpu_count": 2,
     "memory": 4096,
     "vlan": "VM Network"
+  },
+  "provision": {
+    "tags":["pre-tasks", "project", "sulu_project"]
   }
 }
