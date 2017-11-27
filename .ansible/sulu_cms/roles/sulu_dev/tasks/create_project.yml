@@ -15,26 +15,9 @@
       args:
         chdir: /projects/
 
-    - name: Migrate the sulu project with existing codes
+    - name: Migrate the Sulu project with existing codes
       command: "mv -r /projects/{{project_taget_directory}} /projects/{{project.name}}"
       when: exists_sulu_project == True
-
-    - name: Create and configure Sulu CMS project
-      block:
-        - name: Configure the webspaces xml
-          template:
-            src: sulu/webspaces/sulo.example.xml
-            dest: "/projects/{{project.name}}/app/Resources/webspaces/{{project.domain.dev}}.xml"
-
-        - name: Set up the database configruations
-          template:
-            src: sulu/config/parameters.yml
-            dest: "/projects/{{project.name}}/app/config/parameters.yml"
-
-        - name: Run the admin console of Sulu
-          command: bin/adminconsole sulu:build dev -q
-          args:
-            chdir: "/projects/{{project.name}}/"
   rescue:
     - debug: msg='There is some errors during the provision. Please check the log.'
   always:
@@ -42,6 +25,35 @@
       file:
         path: "/projects/{{project.name}}_tmp"
         state: absent
+  become_user: "{{nginx_server.user}}"
+  tags:
+    - sulu_project
+    
+- name: Make sure the Sulu project directory has the correct rights settings
+  file:
+    path: "/projects/{{project.name}}"
+    owner: "{{nginx_server.user}}"
+    group: "{{nginx_server.group}}"
+    mode: 0770
+  tags:
+    - sulu_project
+    
+- name: Create and configure Sulu CMS project
+  block:
+    - name: Configure the webspaces xml
+      template:
+        src: sulu/webspaces/sulo.example.xml
+        dest: "/projects/{{project.name}}/app/Resources/webspaces/{{project.domain.dev}}.xml"
+
+    - name: Set up the database configruations
+      template:
+        src: sulu/config/parameters.yml
+        dest: "/projects/{{project.name}}/app/config/parameters.yml"
+
+    - name: Run the admin console of Sulu
+      command: bin/adminconsole sulu:build dev -q
+      args:
+        chdir: "/projects/{{project.name}}/"
   become_user: "{{nginx_server.user}}"
   tags:
     - sulu_project
