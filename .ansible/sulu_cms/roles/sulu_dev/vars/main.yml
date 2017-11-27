@@ -16,5 +16,3 @@ project:
     user: sulu
     passwd: sulu
     secret_key: ThisTokenIsNotSoSecretChangeIt
-
-play_project_role: other

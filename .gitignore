@@ -3,3 +3,4 @@
 *.retry
 /*.log
 /config.box.json
+/.ansible/sulu_cms/vars/
