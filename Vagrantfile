@@ -67,7 +67,6 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "ansible" do |ansible|
     ansible.config_file = ".ansible/ansible.cfg"
-    ansible.tags = "pre-tasks, sulu_project"
     ansible.playbook = ".ansible/lnmp.yml"
   end
 end
