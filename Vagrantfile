@@ -66,7 +66,7 @@ Vagrant.configure(2) do |config|
   config_vm(config.vm, config_data)
 
   config.vm.provision "ansible" do |ansible|
-    if config_data['provision'] &&  config_data['provision']['tags']
+    if config_data['provision'] && config_data['provision']['tags'].any?
       ansible.tags = config_data['provision']['tags']
     end
     ansible.config_file = ".ansible/ansible.cfg"

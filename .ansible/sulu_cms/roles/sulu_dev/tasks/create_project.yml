@@ -16,7 +16,7 @@
         chdir: /projects/
 
     - name: Migrate the Sulu project with existing codes
-      command: "mv -r /projects/{{project_taget_directory}} /projects/{{project.name}}"
+      command: "mv /projects/{{project_taget_directory}} /projects/{{project.name}}"
       when: exists_sulu_project == True
   rescue:
     - debug: msg='There is some errors during the provision. Please check the log.'
@@ -27,16 +27,16 @@
         state: absent
   become_user: "{{nginx_server.user}}"
   tags:
-    - sulu_project
+    - sulu-project
     
 - name: Make sure the Sulu project directory has the correct rights settings
   file:
     path: "/projects/{{project.name}}"
     owner: "{{nginx_server.user}}"
-    group: "{{nginx_server.group}}"
+    group: "{{nginx_server.usergroup}}"
     mode: 0770
   tags:
-    - sulu_project
+    - sulu-project
     
 - name: Create and configure Sulu CMS project
   block:
@@ -56,4 +56,4 @@
         chdir: "/projects/{{project.name}}/"
   become_user: "{{nginx_server.user}}"
   tags:
-    - sulu_project
+    - sulu-project

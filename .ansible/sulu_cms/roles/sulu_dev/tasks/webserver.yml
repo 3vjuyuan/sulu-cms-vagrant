@@ -6,7 +6,7 @@
   notify: Restart Web Server
   tags:
     - webserver
-    - sulu_project
+    - sulu-project
 
 - name: Generate self-signed SSL certification for nginx server and set up nginx configuration file
   block:
@@ -51,4 +51,4 @@
       notify: Restart Web Server
   tags:
     - webserver
-    - sulu_project
+    - sulu-project

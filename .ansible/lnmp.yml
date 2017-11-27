@@ -16,6 +16,8 @@
     - name: Install python for Ansible
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-simplejson)
       changed_when: False
+  tags:
+    - ansible-env
 
 - name: Set up the development system by vagrant ansible provision
   hosts: all

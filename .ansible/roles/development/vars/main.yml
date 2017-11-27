@@ -1,9 +1,4 @@
 ---
-nginx_server:
-  user: vagrant
-  usergroup: vagrant
-  default_config: "default.conf"
-
 php_conf:
   xdebug_version: 2.5.5
 

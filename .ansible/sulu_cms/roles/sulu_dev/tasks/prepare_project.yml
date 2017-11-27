@@ -20,7 +20,7 @@
         priv: '{{project.database.dbname}}.*:ALL'
         state: present
   tags:
-    - sulu_project
+    - sulu-project
 
 - name: Make sure the projects directory is created
   file:
@@ -30,4 +30,4 @@
     group: "{{nginx_server.usergroup}}"
     mode: 0770
   tags:
-    - sulu_project
+    - sulu-project

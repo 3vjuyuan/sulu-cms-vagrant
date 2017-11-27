@@ -3,8 +3,8 @@
   "name": "your-name",
   "provider": "vsphere"
   "box":{
-    "name": "3vjuyuan/lnmp",
-     "url": "https://raw.githubusercontent.com/3vjuyuan/vagrant-esxi-ansible/master/box/box.json"
+    "name": "sunweiye/lnmp",
+     "url": "https://raw.githubusercontent.com/sunweiye/vagrant-lnmp-box/master/box/lnmp.box"
   },
   "vsphere": {
     "vcenter": "192.168.1.50",
@@ -21,8 +21,5 @@
     "cpu_count": 2,
     "memory": 4096,
     "vlan": "VM Network"
-  },
-  "provision": {
-    "tags":["pre-tasks", "project", "sulu_project"]
   }
 }

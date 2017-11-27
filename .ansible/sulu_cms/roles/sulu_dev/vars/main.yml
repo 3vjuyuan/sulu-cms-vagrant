@@ -2,7 +2,7 @@
 nginx_server:
   user: ubuntu
   usergroup: ubuntu
-  default_config: "default.conf"
+  default_config: "sulu.conf"
 
 openssl:
   csr_fields:
