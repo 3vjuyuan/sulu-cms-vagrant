@@ -35,6 +35,7 @@
     owner: "{{nginx_server.user}}"
     group: "{{nginx_server.usergroup}}"
     mode: 0770
+    recurse: True
   tags:
     - sulu-project
     

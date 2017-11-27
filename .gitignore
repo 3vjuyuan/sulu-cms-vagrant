@@ -1,5 +1,5 @@
 .idea/
-.vagrant/
+.vagrant
 *.retry
 /*.log
 /config.box.json

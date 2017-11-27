@@ -7,13 +7,13 @@
      "url": "https://raw.githubusercontent.com/sunweiye/vagrant-lnmp-box/master/box/lnmp.box"
   },
   "vsphere": {
-    "vcenter": "192.168.1.50",
-    "data_center":"data",
-    "host": "192.168.1.10",
-    "template": "Templates/ubuntu-16-box",
-    "base_path": "vagrant-box/box/",
-    "resource_pool": "box",
-    "storage": "/datastore2_st_1000",
+    "vcenter": "vcenter.address",
+    "data_center": "data-center-name",
+    "host": "exsi.host.address",
+    "template": "vm-template-name",
+    "base_path": "vm-folder-path",
+    "resource_pool": "resource-pool-name",
+    "storage": "data-storage-name",
     "user": "vcenter-user",
     "passwd": "vcenter-user-passwd"
   },
@@ -21,5 +21,8 @@
     "cpu_count": 2,
     "memory": 4096,
     "vlan": "VM Network"
+  },
+  "provision": {
+    "tags": []
   }
 }
